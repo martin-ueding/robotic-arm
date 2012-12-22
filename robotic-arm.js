@@ -7,8 +7,7 @@
 var width = 600;
 var height = 400;
 var radius = [20, 18, 15];
-var thickness1 = 15;
-var thickness2 = 7;
+var thickness = [15, 4];
 
 var circleAttributes = {
 	fill: "white",
@@ -79,7 +78,7 @@ var setTransform = function(range) {
 
 	arm1.transform("t-"+armLength/2+",0r-"+a+"t"+armLength/2+",0");
 	mid = midPos(range);
-	arm2.attr({x: mid.x, y: mid.y - thickness2/2});
+	arm2.attr({x: mid.x, y: mid.y - thickness[1]/2});
 	arm2.transform("t-"+armLength/2+",0r"+a+"t"+armLength/2+",0");
 };
 
@@ -103,8 +102,8 @@ var main = function() {
 	var x3 = range + radius[0];
 	var y3 = height-radius[0];
 
-	arm1 = paper.rect(x1, y1-thickness1/2, maxrange/2, thickness1).attr(armAttributes);
-	arm2 = paper.rect(x2, y2-thickness2/2, maxrange/2, thickness2).attr(armAttributes);
+	arm1 = paper.rect(x1, y1-thickness[0]/2, maxrange/2, thickness[0]).attr(armAttributes);
+	arm2 = paper.rect(x2, y2-thickness[1]/2, maxrange/2, thickness[1]).attr(armAttributes);
 
 	first = paper.circle(x1, y1, radius[0]).attr(circleAttributes);
 	middle = paper.circle(x2, y2, radius[1]).attr(circleAttributes);
