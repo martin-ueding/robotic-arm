@@ -44,14 +44,14 @@ var roboticArm = function(width, height) {
 	this.armLength = this.maxrange / 2;
 
 	this.angle = function(range) {
-		var p = range/(2 * armLength);
+		var p = range/(2 * this.armLength);
 		return Math.acos(p);
 	};
 
 	this.midPos = function(range) {
 		return {
 			x: this.range / 2 + this.radius[0],
-				y: this.height - Math.sin(angle(range)) * this.armLength - this.radius[0]
+			y: this.height - Math.sin(this.angle(range)) * this.armLength - this.radius[0]
 		};
 	};
 
@@ -63,11 +63,11 @@ var roboticArm = function(width, height) {
 			x = 2 * this.radius[0] + this.radius[2];
 		}
 
-		this.attr({cx: x});
+		this.last.attr({cx: x});
 
 		this.range = x - this.radius[0];
 
-		var p = midPos(this.range);
+		var p = this.midPos(this.range);
 
 		this.middle.attr({
 			cx: p.x,
@@ -87,20 +87,20 @@ var roboticArm = function(width, height) {
 	this.middle = undefined;
 
 	this.setTransform = function(range) {
-		var a = angle(range) * 180 / Math.PI;
+		var a = this.angle(range) * 180 / Math.PI;
 
 		this.arm1.transform("t-"+this.armLength/2+",0r-"+a+"t"+this.armLength/2+",0");
-		this.mid = midPos(range);
+		var mid = this.midPos(range);
 		this.arm2.attr({x: mid.x, y: mid.y - this.thickness[1]/2});
 		this.arm2.transform("t-"+this.armLength/2+",0r"+a+"t"+this.armLength/2+",0");
 	};
 
 	this.realRangePart = function(range) {
-		return (range-radius[0]-radius[2])/(maxrange-radius[0]-radius[2]);
+		return (range-this.radius[0]-this.radius[2])/(this.maxrange-this.radius[0]-this.radius[2]);
 	};
 
 	this.updateText = function(range) {
-		this.text.attr({text: "Reichweite "+Math.round(realRangePart(range)*100)+" %"});
+		this.text.attr({text: "Reichweite "+Math.round(this.realRangePart(range)*100)+" %"});
 	};
 
 	this.main = function() {
@@ -115,8 +115,8 @@ var roboticArm = function(width, height) {
 		var x3 = this.range + this.radius[0];
 		var y3 = this.height-this.radius[0];
 
-		this.arm1 = paper.rect(x1, y1-this.thickness[0]/2, this.maxrange/2, thickness[0]).attr(this.armAttributes);
-		this.arm2 = paper.rect(x2, y2-this.thickness[1]/2, this.maxrange/2, thickness[1]).attr(this.armAttributes);
+		this.arm1 = paper.rect(x1, y1-this.thickness[0]/2, this.maxrange/2, this.thickness[0]).attr(this.armAttributes);
+		this.arm2 = paper.rect(x2, y2-this.thickness[1]/2, this.maxrange/2, this.thickness[1]).attr(this.armAttributes);
 
 		this.first = paper.circle(x1, y1, this.radius[0]).attr(this.circleAttributes);
 		this.middle = paper.circle(x2, y2, this.radius[1]).attr(this.circleAttributes);
@@ -124,13 +124,13 @@ var roboticArm = function(width, height) {
 
 		this.last.attr({cursor: "move"});
 
-		this.last.drag(this.onMove, this.onStart, this.onEnd);
+		this.last.drag(this.onMove.bind(this), this.onStart.bind(this), this.onEnd.bind(this));
 
-		this.setTransform(range);
+		this.setTransform(this.range);
 
-		this.text = paper.text(width/2, 20);
+		this.text = paper.text(this.width/2, 20);
 		this.updateText(this.range);
 	};
 
-	window.onload = this.main;
+	window.onload = this.main.bind(this);
 };
