@@ -20,123 +20,117 @@
  * IN THE SOFTWARE.
  */
 
-/*****************************************************************************/
-/*                                  Options                                  */
-/*****************************************************************************/
+var roboticArm = function(width, height) {
+	this.width = width;
+	this.height = height;
+	this.radius = [20, 18, 15];
+	this.thickness = [15, 4];
 
-var width = 600;
-var height = 400;
-var radius = [20, 18, 15];
-var thickness = [15, 4];
-
-var circleAttributes = {
-	fill: "white",
-	stroke: "blue",
-};
-
-var armAttributes = {
-	fill: "white",
-	stroke: "blue",
-};
-
-/*****************************************************************************/
-/*                              Implementation                               */
-/*****************************************************************************/
-
-var first, middle, last, arm1, arm2, text;
-
-var maxrange = width - radius[0] - radius[2];
-var range = maxrange / 2;
-
-var armLength = maxrange / 2;
-
-var angle = function(range) {
-	var p = range/(2 * armLength);
-	return Math.acos(p);
-};
-
-var midPos = function(range) {
-	return {
-		x: range / 2 + radius[0],
-			y: height - Math.sin(angle(range)) * armLength - radius[0]
+	this.circleAttributes = {
+		fill: "white",
+		stroke: "blue",
 	};
+
+	this.armAttributes = {
+		fill: "white",
+		stroke: "blue",
+	};
+
+	this.first, this.middle, this.last, this.arm1, this.arm2, this.text;
+
+	this.maxrange = this.width - this.radius[0] - this.radius[2];
+	this.range = this.maxrange / 2;
+
+	this.armLength = this.maxrange / 2;
+
+	this.angle = function(range) {
+		var p = range/(2 * armLength);
+		return Math.acos(p);
+	};
+
+	this.midPos = function(range) {
+		return {
+			x: this.range / 2 + this.radius[0],
+				y: this.height - Math.sin(angle(range)) * this.armLength - this.radius[0]
+		};
+	};
+
+	this.onMove = function(dx, dy, x, y, e) {
+		if (x > this.width - this.radius[2]) {
+			x = this.width - this.radius[2];
+		}
+		else if (x < 2 * this.radius[0] + this.radius[2]) {
+			x = 2 * this.radius[0] + this.radius[2];
+		}
+
+		this.attr({cx: x});
+
+		this.range = x - this.radius[0];
+
+		var p = midPos(this.range);
+
+		this.middle.attr({
+			cx: p.x,
+			cy: p.y,
+		});
+
+		this.setTransform(this.range);
+		this.updateText(this.range);
+	};
+
+	this.onStart = function(x, y, e) {
+	};
+
+	this.onEnd = function(e) {
+	};
+
+	this.middle = undefined;
+
+	this.setTransform = function(range) {
+		var a = angle(range) * 180 / Math.PI;
+
+		this.arm1.transform("t-"+this.armLength/2+",0r-"+a+"t"+this.armLength/2+",0");
+		this.mid = midPos(range);
+		this.arm2.attr({x: mid.x, y: mid.y - this.thickness[1]/2});
+		this.arm2.transform("t-"+this.armLength/2+",0r"+a+"t"+this.armLength/2+",0");
+	};
+
+	this.realRangePart = function(range) {
+		return (range-radius[0]-radius[2])/(maxrange-radius[0]-radius[2]);
+	};
+
+	this.updateText = function(range) {
+		this.text.attr({text: "Reichweite "+Math.round(realRangePart(range)*100)+" %"});
+	};
+
+	this.main = function() {
+		var paper = Raphael("roboticarm", this.width, this.height);
+
+		var initMidPos = this.midPos(this.range);
+
+		var x1 = this.radius[0];
+		var y1 = this.height-this.radius[0];
+		var x2 = initMidPos.x;
+		var y2 = initMidPos.y;
+		var x3 = this.range + this.radius[0];
+		var y3 = this.height-this.radius[0];
+
+		this.arm1 = paper.rect(x1, y1-this.thickness[0]/2, this.maxrange/2, thickness[0]).attr(this.armAttributes);
+		this.arm2 = paper.rect(x2, y2-this.thickness[1]/2, this.maxrange/2, thickness[1]).attr(this.armAttributes);
+
+		this.first = paper.circle(x1, y1, this.radius[0]).attr(this.circleAttributes);
+		this.middle = paper.circle(x2, y2, this.radius[1]).attr(this.circleAttributes);
+		this.last = paper.circle(x3, y3, this.radius[2]).attr(this.circleAttributes);
+
+		this.last.attr({cursor: "move"});
+
+		this.last.drag(this.onMove, this.onStart, this.onEnd);
+
+		this.setTransform(range);
+
+		this.text = paper.text(width/2, 20);
+		this.updateText(this.range);
+	};
+
+	window.onload = this.main;
 };
-
-var onMove = function(dx, dy, x, y, e) {
-	if (x > width - radius[2]) {
-		x = width - radius[2];
-	}
-	else if (x < 2 * radius[0] + radius[2]) {
-		x = 2 * radius[0] + radius[2];
-	}
-
-	this.attr({cx: x});
-
-	range = x - radius[0];
-
-	p = midPos(range);
-
-	middle.attr({
-		cx: p.x,
-		cy: p.y,
-	});
-
-	setTransform(range);
-	updateText(range);
-};
-
-var onStart = function(x, y, e) {
-};
-
-var onEnd = function(e) {
-};
-
-var middle = undefined;
-
-var setTransform = function(range) {
-	var a = angle(range) * 180 / Math.PI;
-
-	arm1.transform("t-"+armLength/2+",0r-"+a+"t"+armLength/2+",0");
-	mid = midPos(range);
-	arm2.attr({x: mid.x, y: mid.y - thickness[1]/2});
-	arm2.transform("t-"+armLength/2+",0r"+a+"t"+armLength/2+",0");
-};
-
-var realRangePart = function(range) {
-	return (range-radius[0]-radius[2])/(maxrange-radius[0]-radius[2]);
-};
-
-var updateText = function(range) {
-	text.attr({text: "Reichweite "+Math.round(realRangePart(range)*100)+" %"});
-};
-
-var main = function() {
-	var paper = Raphael("roboticarm", width, height);
-	
-	var initMidPos = midPos(range);
-
-	var x1 = radius[0];
-	var y1 = height-radius[0];
-	var x2 = initMidPos.x;
-	var y2 = initMidPos.y;
-	var x3 = range + radius[0];
-	var y3 = height-radius[0];
-
-	arm1 = paper.rect(x1, y1-thickness[0]/2, maxrange/2, thickness[0]).attr(armAttributes);
-	arm2 = paper.rect(x2, y2-thickness[1]/2, maxrange/2, thickness[1]).attr(armAttributes);
-
-	first = paper.circle(x1, y1, radius[0]).attr(circleAttributes);
-	middle = paper.circle(x2, y2, radius[1]).attr(circleAttributes);
-	last = paper.circle(x3, y3, radius[2]).attr(circleAttributes);
-
-	last.attr({cursor: "move"});
-
-	last.drag(onMove, onStart, onEnd);
-
-	setTransform(range);
-
-	text = paper.text(width/2, 20);
-	updateText(range);
-};
-
-window.onload = main;
