@@ -6,22 +6,23 @@
 
 var width = 300;
 var height = 200;
-var radius = 10;
-var thickness = 4;
+var radius = 20;
+var thickness = 15;
 
 var circleAttributes = {
-	fill: "red"
+	fill: "r(.5,.0)hsb(0,0,.90)-hsb(0,0,.50)",
 };
 
 var armAttributes = {
-	fill: "gray"
+	fill: "90-hsb(0,0,.70)-hsb(0,0,.80)",
+	stroke: "black",
 };
 
 /*****************************************************************************/
 /*                              Implementation                               */
 /*****************************************************************************/
 
-var first, middle, last, arm1, arm2;
+var first, middle, last, arm1, arm2, text;
 
 var maxrange = width - 2 * radius;
 var range = maxrange / 2;
@@ -56,10 +57,11 @@ var onMove = function(dx, dy, x, y, e) {
 
 	middle.attr({
 		cx: p.x,
-		cy: p.y
+		cy: p.y,
 	});
 
 	setTransform(range);
+	updateText(range);
 };
 
 var onStart = function(x, y, e) {
@@ -75,8 +77,16 @@ var setTransform = function(range) {
 
 	arm1.transform("t-"+armLength/2+",0r-"+a+"t"+armLength/2+",0");
 	mid = midPos(range);
-	arm2.attr({x: mid.x, y: mid.y});
+	arm2.attr({x: mid.x, y: mid.y - thickness/2});
 	arm2.transform("t-"+armLength/2+",0r"+a+"t"+armLength/2+",0");
+};
+
+var realRangePart = function(range) {
+	return (range-2*radius)/(maxrange-2 *radius);
+};
+
+var updateText = function(range) {
+	text.attr({text: "Reichweite "+Math.round(realRangePart(range)*100)+" %"});
 };
 
 var main = function() {
@@ -91,8 +101,8 @@ var main = function() {
 	var x3 = range + radius;
 	var y3 = height-radius;
 
-	arm1 = paper.rect(x1, y1, maxrange/2, thickness);
-	arm2 = paper.rect(x2, y2, maxrange/2, thickness);
+	arm1 = paper.rect(x1, y1-thickness/2, maxrange/2, thickness).attr(armAttributes);
+	arm2 = paper.rect(x2, y2-thickness/2, maxrange/2, thickness).attr(armAttributes);
 
 	first = paper.circle(x1, y1, radius).attr(circleAttributes);
 	middle = paper.circle(x2, y2, radius).attr(circleAttributes);
@@ -101,6 +111,11 @@ var main = function() {
 	last.attr({cursor: "move"});
 
 	last.drag(onMove, onStart, onEnd);
+
+	setTransform(range);
+
+	text = paper.text(width/2, 20);
+	updateText(range);
 };
 
 window.onload = main;
