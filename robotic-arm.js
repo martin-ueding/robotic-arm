@@ -7,14 +7,21 @@
 var width = 300;
 var height = 200;
 var radius = 10;
+var thickness = 4;
 
 var circleAttributes = {
 	fill: "red"
 };
 
+var armAttributes = {
+	fill: "gray"
+};
+
 /*****************************************************************************/
 /*                              Implementation                               */
 /*****************************************************************************/
+
+var first, middle, last, arm1, arm2;
 
 var maxrange = width - 2 * radius;
 var range = maxrange / 2;
@@ -22,7 +29,8 @@ var range = maxrange / 2;
 var armLength = maxrange / 2;
 
 var angle = function(range) {
-	return Math.acos(range/(2 * armLength));
+	var p = range/(2 * armLength);
+	return Math.acos(p);
 };
 
 var midPos = function(range) {
@@ -50,6 +58,8 @@ var onMove = function(dx, dy, x, y, e) {
 		cx: p.x,
 		cy: p.y
 	});
+
+	setTransform(range);
 };
 
 var onStart = function(x, y, e) {
@@ -60,19 +70,33 @@ var onEnd = function(e) {
 
 var middle = undefined;
 
+var setTransform = function(range) {
+	var a = angle(range) * 180 / Math.PI;
+
+	arm1.transform("t-"+armLength/2+",0r-"+a+"t"+armLength/2+",0");
+	mid = midPos(range);
+	arm2.attr({x: mid.x, y: mid.y});
+	arm2.transform("t-"+armLength/2+",0r"+a+"t"+armLength/2+",0");
+};
+
 var main = function() {
 	var paper = Raphael("roboticarm", width, height);
 	
 	var initMidPos = midPos(range);
 
-	var dots = [
-		paper.circle(radius, height-radius, radius).attr(circleAttributes),
-		paper.circle(initMidPos.x, initMidPos.y, radius).attr(circleAttributes),
-		paper.circle(range + radius, height-radius, radius).attr(circleAttributes)
-			];
+	var x1 = radius;
+	var y1 = height-radius;
+	var x2 = initMidPos.x;
+	var y2 = initMidPos.y;
+	var x3 = range + radius;
+	var y3 = height-radius;
 
-	middle = dots[1];
-	var last = dots[2];
+	arm1 = paper.rect(x1, y1, maxrange/2, thickness);
+	arm2 = paper.rect(x2, y2, maxrange/2, thickness);
+
+	first = paper.circle(x1, y1, radius).attr(circleAttributes);
+	middle = paper.circle(x2, y2, radius).attr(circleAttributes);
+	last = paper.circle(x3, y3, radius).attr(circleAttributes);
 
 	last.attr({cursor: "move"});
 
