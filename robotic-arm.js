@@ -22,7 +22,7 @@
 
 var roboticArm = function(width, height, totalMeasure, changeCallback) {
 	this.width = width;
-	this.height = height - 50;
+	this.height = height - 30;
 	this.totalheight = height;
 	this.totalMeasure = totalMeasure;
 	this.changeCallback = changeCallback;
