@@ -20,11 +20,12 @@
  * IN THE SOFTWARE.
  */
 
-var roboticArm = function(width, height, totalMeasure) {
+var roboticArm = function(width, height, totalMeasure, changeCallback) {
 	this.width = width;
 	this.height = height - 50;
 	this.totalheight = height;
 	this.totalMeasure = totalMeasure;
+	this.changeCallback = changeCallback;
 	this.radius = [20, 18, 15];
 	this.thickness = [15, 4];
 
@@ -77,6 +78,8 @@ var roboticArm = function(width, height, totalMeasure) {
 		});
 
 		this.setTransform(this.range);
+
+		this.changeCallback(this.realRangePart(this.range), this.realRange(this.range));
 	};
 
 	this.onStart = function(x, y, e) {
