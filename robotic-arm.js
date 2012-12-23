@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-var roboticArm = function(width, height) {
+var roboticArm = function(width, height, totalMeasure) {
 	this.width = width;
-	this.height = height;
+	this.height = height - 50;
+	this.totalheight = height;
+	this.totalMeasure = totalMeasure;
 	this.radius = [20, 18, 15];
 	this.thickness = [15, 4];
 
@@ -75,7 +77,6 @@ var roboticArm = function(width, height) {
 		});
 
 		this.setTransform(this.range);
-		this.updateText(this.range);
 	};
 
 	this.onStart = function(x, y, e) {
@@ -99,9 +100,27 @@ var roboticArm = function(width, height) {
 		return (range-this.radius[0]-this.radius[2])/(this.maxrange-this.radius[0]-this.radius[2]);
 	};
 
+	this.realRange = function(range) {
+		return this.totalMeasure * this.realRangePart(range);
+	}
+
+	this.drawRuler = function(paper) {
+		var y = this.height - (this.radius[0] - this.radius[2]) + 2;
+		var x = 2 * this.radius[0] + this.radius[2];
+		var end = this.width - this.radius[2];
+		var step = (end - x) / 25;
+		var ticks = [];
+		for (var i = 0; x <= end; x += step, ++i) {
+			var width = i % 5 == 0 ? 2 : 1;
+			ticks.push(paper.path("M"+x+","+y+"v5").attr({fill: "#000", stroke: "#000", "stroke-width": width}));
+			if (i % 5 == 0) {
+				ticks.push(paper.text(x, y+20, Math.round(this.realRange(x - this.radius[0]))));
+			}
+		}
+	};
 
 	this.main = function() {
-		var paper = Raphael("roboticarm", this.width, this.height);
+		var paper = Raphael("roboticarm", this.width, this.totalheight);
 
 		var initMidPos = this.midPos(this.range);
 
@@ -124,6 +143,8 @@ var roboticArm = function(width, height) {
 		this.last.drag(this.onMove.bind(this), this.onStart.bind(this), this.onEnd.bind(this));
 
 		this.setTransform(this.range);
+
+		this.drawRuler(paper);
 	};
 
 	window.onload = this.main.bind(this);
