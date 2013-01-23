@@ -1,4 +1,4 @@
-// Copyright © 2012 Martin Ueding <dev@martin-ueding.de>
+// Copyright © 2012-2013 Martin Ueding <dev@martin-ueding.de>
 
 /*
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -59,6 +59,8 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 	};
 
 	this.onMove = function(dx, dy, x, y, e) {
+		x -= $("#roboticarm").position().left;
+
 		if (x > this.width - this.radius[2]) {
 			x = this.width - this.radius[2];
 		}
