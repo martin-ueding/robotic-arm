@@ -39,7 +39,7 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 		stroke: "blue",
 	};
 
-	this.first, this.middle, this.last, this.arm1, this.arm2;
+	this.first, this.middle, this.last, this.arm1, this.arm2, this.text;
 
 	this.maxrange = this.width - this.radius[0] - this.radius[2];
 	this.range = this.maxrange / 2;
@@ -82,6 +82,8 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 		this.setTransform(this.range);
 
 		this.changeCallback(this.realRangePart(this.range), this.realRange(this.range));
+
+		this.updateText(this.range);
 	};
 
 	this.onStart = function(x, y, e) {
@@ -124,6 +126,10 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 		}
 	};
 
+	this.updateText = function(range) {
+		this.text.attr({text: "Reichweite "+Math.round(this.realRangePart(range) * this.totalMeasure)});
+	};
+
 	this.main = function() {
 		var paper = Raphael("roboticarm", this.width, this.totalheight);
 
@@ -150,6 +156,8 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 		this.setTransform(this.range);
 
 		this.drawRuler(paper);
+		this.text = paper.text(this.width/2, 20);
+		this.updateText(this.range);
 	};
 
 	window.onload = this.main.bind(this);
