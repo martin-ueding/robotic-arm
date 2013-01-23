@@ -59,7 +59,7 @@ var roboticArm = function(width, height, totalMeasure, changeCallback) {
 	};
 
 	this.onMove = function(dx, dy, x, y, e) {
-		x -= $("#roboticarm").position().left;
+		x -= $("#roboticarm svg").position().left;
 
 		if (x > this.width - this.radius[2]) {
 			x = this.width - this.radius[2];
